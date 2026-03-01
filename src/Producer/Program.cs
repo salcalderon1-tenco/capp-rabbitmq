@@ -1,24 +1,22 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Producer;
+using Serilog;
 using Simone.Common.RabbitMQ.Extensions;
 
-var configuration = new ConfigurationBuilder()
- .AddJsonFile("appsettings.json")
- .Build();
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(builder.Configuration), preserveStaticLogger: true);
+builder.Services.AddRabbitMQ(builder.Configuration);
+builder.Services.TryAddTransient<ChatProducer>();
 
-var services = new ServiceCollection()
-    .AddSingleton<IConfiguration>(configuration);
-services.AddLogging(configure => configure.AddConsole());
-services.AddRabbitMQ(configuration);
-services.TryAddSingleton<ChatProducer>();
-
-services.BuildServiceProvider();
+var app = builder.Build();
+_  = app.StartAsync();
 
 // Request message input from the user and send it to the consumer
-var chatProducer = services.BuildServiceProvider().GetRequiredService<ChatProducer>();
+var chatProducer = app.Services.GetRequiredService<ChatProducer>();
 while (true)
 {
     Console.Write("Enter a message to send (or 'exit' to quit): ");

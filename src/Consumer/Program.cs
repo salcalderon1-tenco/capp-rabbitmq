@@ -1,22 +1,16 @@
 ﻿using Consumer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Serilog;
 using Shared;
 using Simone.Common.RabbitMQ.Extensions;
 
-var configuration = new ConfigurationBuilder()
- .AddJsonFile("appsettings.json")
- .Build();
+var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(builder.Configuration), preserveStaticLogger: true);
 
-var services = new ServiceCollection()
-    .AddSingleton<IConfiguration>(configuration);
-services.AddLogging(configure => configure.AddConsole());
+builder.Services.AddRabbitMQ(builder.Configuration)
+.AddConsumer<ChatMessage, ChatConsumer>(services: builder.Services);
 
-services.AddRabbitMQ(configuration)
-    .AddConsumer<ChatMessage, ChatConsumer>(services: services);
-
-services.BuildServiceProvider();
-
-Console.WriteLine("Consumer is running. Press any key to exit...");
-Console.ReadKey();
+var app = builder.Build();
+await app.RunAsync();
