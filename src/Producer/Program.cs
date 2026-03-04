@@ -1,14 +1,14 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Producer;
 using Serilog;
 using Simone.Common.RabbitMQ.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(builder.Configuration), preserveStaticLogger: true);
+builder.Services.AddSerilog((context, config) => config.ReadFrom.Configuration(builder.Configuration), preserveStaticLogger: true);
 builder.Services.AddRabbitMQ(builder.Configuration);
 builder.Services.TryAddTransient<ChatProducer>();
 
@@ -27,3 +27,5 @@ while (true)
     var result = await chatProducer.SendChatMessageAsync(input ?? "No message provided");
     Console.WriteLine($"Message sent with result: {result}");
 }
+
+await app.StopAsync();
