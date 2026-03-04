@@ -26,4 +26,4 @@ In the `appsettings.json` file of both the consumer and producer projects, add t
 2. Run the consumer project to start listening for messages.
 3. Run the producer project to send messages to the queue.
 
-Open the console in each project an execute `dotnet run` to start the applications. You should see the producer sending messages and the consumer receiving them.
+Open the console in each project an execute `dotnet run` to start the applications. You can send messages from the producer and see them being received by the consumer.
