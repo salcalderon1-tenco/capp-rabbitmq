@@ -21,6 +21,8 @@ In the `appsettings.json` file of both the consumer and producer projects, add t
 }
 ```
 
+For more details on the configuration, please refer to the [Simone.Common.RabbitMQ](https://github.com/tenco-rd/Simone.Common/blob/master/src/Simone.Common.RabbitMQ/README.md#configuration)
+
 ### Run the Producer and Consumer
 1. Start the RabbitMQ container using Docker.
 2. Run the consumer project to start listening for messages.
